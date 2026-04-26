@@ -8,43 +8,52 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a1628; color: #fff; display: flex; height: 100vh; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a2a4a; color: #fff; display: flex; height: 100vh; }
 
-#map { width: 60%; height: 100%; }
+#map { width: 62%; height: 100%; }
 
-.sidebar { width: 40%; height: 100%; background: #111d33; padding: 25px; overflow-y: auto; }
-.sidebar-title { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+.sidebar { width: 38%; height: 100%; background: #111d33; padding: 22px 20px; overflow-y: auto; }
+.sidebar-title { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
 .sidebar-title span { color: #f0c040; }
-.sidebar-sub { font-size: 13px; color: #8899bb; margin-bottom: 18px; }
+.sidebar-sub { font-size: 12px; color: #8899bb; margin-bottom: 16px; }
 
-.day-card { display: flex; margin-bottom: 12px; }
-.day-num { width: 46px; flex-shrink: 0; }
-.day-num .circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #fff; }
-.day-info { flex: 1; padding-left: 12px; border-left: 2px solid #2a3a5a; padding-bottom: 10px; }
-.day-info .title { font-size: 15px; font-weight: bold; margin-bottom: 3px; }
-.day-info .desc { font-size: 12px; color: #8899bb; line-height: 1.5; }
-.day-info .transport { font-size: 11px; color: #5a7a9a; margin-top: 3px; }
+.day-card { display: flex; margin-bottom: 10px; }
+.day-num { width: 44px; flex-shrink: 0; }
+.day-num .circle { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #fff; }
+.day-info { flex: 1; padding-left: 10px; border-left: 2px solid #2a3a5a; padding-bottom: 8px; }
+.day-info .title { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+.day-info .desc { font-size: 11px; color: #8899bb; line-height: 1.4; }
+.day-info .transport { font-size: 10px; color: #5a7a9a; margin-top: 2px; }
 
-.stats-bar { display: flex; justify-content: space-around; padding: 15px 0; margin-top: 15px; border-top: 1px solid #2a3a5a; }
+.stats-bar { display: flex; justify-content: space-around; padding: 12px 0; margin-top: 12px; border-top: 1px solid #2a3a5a; }
 .stat { text-align: center; }
-.stat .num { font-size: 22px; font-weight: bold; color: #f0c040; }
-.stat .label { font-size: 11px; color: #8899bb; }
+.stat .num { font-size: 20px; font-weight: bold; color: #f0c040; }
+.stat .label { font-size: 10px; color: #8899bb; }
 
-.tips { margin-top: 15px; padding: 12px 14px; background: rgba(240,192,64,0.1); border-left: 3px solid #f0c040; border-radius: 4px; }
-.tips .tip-title { font-size: 13px; font-weight: bold; color: #f0c040; margin-bottom: 5px; }
-.tips .tip-text { font-size: 11px; color: #8899bb; line-height: 1.6; }
+.tips { margin-top: 12px; padding: 10px 12px; background: rgba(240,192,64,0.1); border-left: 3px solid #f0c040; border-radius: 4px; }
+.tips .tip-title { font-size: 12px; font-weight: bold; color: #f0c040; margin-bottom: 4px; }
+.tips .tip-text { font-size: 10px; color: #8899bb; line-height: 1.5; }
 
-/* Custom map markers */
 .school-marker { background: none; border: none; }
 .marker-inner { position: relative; text-align: center; }
-.marker-dot { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #fff; margin: 0 auto; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
-.marker-label { font-size: 11px; font-weight: bold; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.9); white-space: nowrap; margin-top: 2px; }
-.marker-day { position: absolute; top: -10px; right: -18px; background: #f0c040; color: #000; font-size: 9px; font-weight: bold; padding: 1px 5px; border-radius: 8px; }
+.marker-dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.marker-label { font-size: 12px; font-weight: bold; color: #333; text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 9px #fff; white-space: nowrap; margin-top: 2px; }
+.marker-day { position: absolute; top: -12px; right: -20px; background: #f0c040; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+/* Distance labels on route */
+.dist-label { background: none; border: none; }
+.dist-text { background: rgba(255,255,255,0.92); color: #333; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 1px solid #ccc; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+/* Boston start marker */
+.start-marker { background: none; border: none; }
+.start-inner { text-align: center; }
+.start-dot { width: 16px; height: 16px; border-radius: 50%; background: #333; border: 3px solid #fff; margin: 0 auto; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.start-label { font-size: 12px; font-weight: bold; color: #333; text-shadow: 0 0 3px #fff, 0 0 6px #fff; white-space: nowrap; margin-top: 2px; }
 
 @media (max-width: 768px) {
   body { flex-direction: column; }
-  #map { width: 100%; height: 50vh; }
-  .sidebar { width: 100%; height: 50vh; }
+  #map { width: 100%; height: 55vh; }
+  .sidebar { width: 100%; height: 45vh; }
 }
 </style>
 </head>
@@ -61,68 +70,62 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a1628; color: #
     <div class="day-info">
       <div class="title">波士顿 → 达特茅斯</div>
       <div class="desc">抵达波士顿，租车北上。参观Dartmouth校园，Baker图书馆</div>
-      <div class="transport">🚗 波士顿→汉诺威 2.5h</div>
+      <div class="transport">🚗 波士顿→汉诺威 200km / 2.5h</div>
     </div>
   </div>
-
   <div class="day-card">
     <div class="day-num"><div class="circle" style="background:#e67e22;">D2</div></div>
     <div class="day-info">
       <div class="title">哈佛 + MIT</div>
       <div class="desc">Harvard Yard、Memorial Hall、Harvard Museum；顺访MIT校园</div>
-      <div class="transport">🚗 汉诺威→波士顿 2h</div>
+      <div class="transport">🚗 汉诺威→波士顿 200km / 2h</div>
     </div>
   </div>
-
   <div class="day-card">
     <div class="day-num"><div class="circle" style="background:#f1c40f;">D3</div></div>
     <div class="day-info">
       <div class="title">布朗大学</div>
       <div class="desc">参观Brown校园、College Hill历史街区、RISD艺术博物馆</div>
-      <div class="transport">🚗 波士顿→普罗维登斯 1h</div>
+      <div class="transport">🚗 波士顿→普罗维登斯 80km / 1h</div>
     </div>
   </div>
-
   <div class="day-card">
     <div class="day-num"><div class="circle" style="background:#2ecc71;">D4</div></div>
     <div class="day-info">
       <div class="title">耶鲁大学</div>
       <div class="desc">Old Campus、Sterling图书馆、Beinecke善本馆、耶鲁艺术馆</div>
-      <div class="transport">🚗 普罗维登斯→纽黑文 2h</div>
+      <div class="transport">🚗 普罗维登斯→纽黑文 160km / 2h</div>
     </div>
   </div>
-
   <div class="day-card">
     <div class="day-num"><div class="circle" style="background:#3498db;">D5</div></div>
     <div class="day-info">
       <div class="title">哥伦比亚大学 + 纽约</div>
       <div class="desc">Columbia校园、Low Library；下午自由活动（中央公园/时代广场）</div>
-      <div class="transport">🚗 纽黑文→纽约 1.5h</div>
+      <div class="transport">🚗 纽黑文→纽约 120km / 1.5h</div>
     </div>
   </div>
-
   <div class="day-card">
     <div class="day-num"><div class="circle" style="background:#9b59b6;">D6</div></div>
     <div class="day-info">
       <div class="title">普林斯顿 + 宾大</div>
       <div class="desc">上午Princeton校园、Nassau Hall；下午UPenn、Franklin Field</div>
-      <div class="transport">🚗 纽约→普林斯顿 1h→费城 1h</div>
+      <div class="transport">🚗 纽约→普林斯顿 80km→费城 70km</div>
     </div>
   </div>
-
   <div class="day-card">
     <div class="day-num"><div class="circle" style="background:#e91e63;">D7</div></div>
     <div class="day-info">
       <div class="title">康奈尔大学 → 返程</div>
       <div class="desc">Cornell校园、钟楼、峡谷瀑布。傍晚返回纽约/波士顿飞回</div>
-      <div class="transport">🚗 费城→伊萨卡 4h</div>
+      <div class="transport">🚗 费城→伊萨卡 370km / 4h</div>
     </div>
   </div>
 
   <div class="stats-bar">
     <div class="stat"><div class="num">8</div><div class="label">藤校全覆盖</div></div>
     <div class="stat"><div class="num">7</div><div class="label">天行程</div></div>
-    <div class="stat"><div class="num">~1500</div><div class="label">公里自驾</div></div>
+    <div class="stat"><div class="num">~1,280</div><div class="label">公里总行驶</div></div>
     <div class="stat"><div class="num">¥3万</div><div class="label">预算/人均</div></div>
   </div>
 
@@ -133,6 +136,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a1628; color: #
 </div>
 
 <script>
+// All stops including Boston as start
+const boston = { name: 'Boston', cn: '波士顿(起点)', lat: 42.3601, lng: -71.0589 };
+
 const schools = [
   { name: 'Dartmouth', cn: '达特茅斯', lat: 43.7044, lng: -72.2887, day: 'D1', color: '#e74c3c' },
   { name: 'Harvard', cn: '哈佛', lat: 42.3770, lng: -71.1167, day: 'D2', color: '#e67e22' },
@@ -144,30 +150,55 @@ const schools = [
   { name: 'Cornell', cn: '康奈尔', lat: 42.4534, lng: -76.4735, day: 'D7', color: '#e91e63' },
 ];
 
-// Route order
-const route = [0, 1, 2, 3, 4, 5, 6, 7]; // Dartmouth→Harvard→Brown→Yale→Columbia→Princeton→UPenn→Cornell
+// Full route: Boston → Dartmouth → Harvard(Boston) → Brown → Yale → Columbia → Princeton → UPenn → Cornell
+const routeStops = [boston, ...schools];
 
-const map = L.map('map', {
-  center: [41.5, -73.5],
-  zoom: 7,
-  zoomControl: true,
-});
+// Distances in km for each edge
+const distances = ['200km', '200km', '80km', '160km', '120km', '80km', '70km', '370km'];
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+const map = L.map('map', { center: [41.5, -73.2], zoom: 7, zoomControl: true });
+
+// Light map tile
+L.tileLayer('https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 19,
 }).addTo(map);
 
-// Draw route polyline
-const routeCoords = route.map(i => [schools[i].lat, schools[i].lng]);
-L.polyline(routeCoords, {
-  color: '#f0c040',
-  weight: 3,
-  opacity: 0.7,
-  dashArray: '10, 6',
-}).addTo(map);
+// Draw route segments with distance labels
+for (let i = 0; i < routeStops.length - 1; i++) {
+  const from = routeStops[i];
+  const to = routeStops[i + 1];
 
-// Add markers
+  // Route line
+  L.polyline([[from.lat, from.lng], [to.lat, to.lng]], {
+    color: '#e74c3c',
+    weight: 3,
+    opacity: 0.8,
+    dashArray: '8, 5',
+  }).addTo(map);
+
+  // Distance label at midpoint
+  const midLat = (from.lat + to.lat) / 2;
+  const midLng = (from.lng + to.lng) / 2;
+  const distIcon = L.divIcon({
+    className: 'dist-label',
+    html: `<div class="dist-text">${distances[i]}</div>`,
+    iconSize: [60, 20],
+    iconAnchor: [30, 10],
+  });
+  L.marker([midLat, midLng], { icon: distIcon, interactive: false }).addTo(map);
+}
+
+// Boston start marker
+const startIcon = L.divIcon({
+  className: 'start-marker',
+  html: `<div class="start-inner"><div class="start-dot"></div><div class="start-label">✈️ Boston 起点</div></div>`,
+  iconSize: [100, 40],
+  iconAnchor: [50, 8],
+});
+L.marker([boston.lat, boston.lng], { icon: startIcon }).addTo(map);
+
+// School markers
 schools.forEach(s => {
   const icon = L.divIcon({
     className: 'school-marker',
@@ -175,18 +206,18 @@ schools.forEach(s => {
       <div class="marker-inner">
         <div class="marker-day">${s.day}</div>
         <div class="marker-dot" style="background:${s.color};"></div>
-        <div class="marker-label">${s.name}<br>${s.cn}</div>
+        <div class="marker-label">${s.name} ${s.cn}</div>
       </div>
     `,
-    iconSize: [80, 50],
-    iconAnchor: [40, 10],
+    iconSize: [120, 50],
+    iconAnchor: [60, 12],
   });
   L.marker([s.lat, s.lng], { icon }).addTo(map);
 });
 
-// Fit bounds
-const bounds = L.latLngBounds(schools.map(s => [s.lat, s.lng]));
-map.fitBounds(bounds.pad(0.15));
+// Fit all points
+const allPoints = routeStops.map(s => [s.lat, s.lng]);
+map.fitBounds(L.latLngBounds(allPoints).pad(0.12));
 </script>
 
 </body>
