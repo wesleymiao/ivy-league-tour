@@ -2,146 +2,59 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>藤校巡游 7天行程 | Ivy League Campus Tour</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 1200px; height: 800px; font-family: 'Segoe UI', Arial, sans-serif; background: #0a1628; color: #fff; display: flex; }
-.map-area { width: 720px; height: 800px; position: relative; background: linear-gradient(135deg, #0a1628, #1a2a4a); }
-.map-title { position: absolute; top: 20px; left: 30px; font-size: 28px; font-weight: bold; }
-.map-title span { color: #f0c040; }
-.map-subtitle { position: absolute; top: 58px; left: 30px; font-size: 14px; color: #8899bb; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a1628; color: #fff; display: flex; height: 100vh; }
 
-/* School dots positioned on approximate US northeast map */
-.school { position: absolute; text-align: center; z-index: 2; }
-.school .dot { width: 18px; height: 18px; border-radius: 50%; margin: 0 auto 4px; border: 2px solid #fff; }
-.school .name { font-size: 11px; font-weight: bold; white-space: nowrap; }
-.school .cn { font-size: 10px; color: #aab; white-space: nowrap; }
-.school .day-badge { position: absolute; top: -12px; right: -16px; background: #f0c040; color: #000; font-size: 9px; font-weight: bold; padding: 1px 5px; border-radius: 8px; }
+#map { width: 60%; height: 100%; }
 
-/* Approximate positions for NE US schools */
-.s-harvard { top: 200px; left: 540px; }
-.s-yale { top: 290px; left: 480px; }
-.s-columbia { top: 340px; left: 440px; }
-.s-princeton { top: 380px; left: 410px; }
-.s-upenn { top: 410px; left: 380px; }
-.s-cornell { top: 250px; left: 340px; }
-.s-brown { top: 220px; left: 560px; }
-.s-dartmouth { top: 150px; left: 490px; }
+.sidebar { width: 40%; height: 100%; background: #111d33; padding: 25px; overflow-y: auto; }
+.sidebar-title { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+.sidebar-title span { color: #f0c040; }
+.sidebar-sub { font-size: 13px; color: #8899bb; margin-bottom: 18px; }
 
-.d1 .dot { background: #e74c3c; }
-.d2 .dot { background: #e67e22; }
-.d3 .dot { background: #f1c40f; }
-.d4 .dot { background: #2ecc71; }
-.d5 .dot { background: #3498db; }
-.d6 .dot { background: #9b59b6; }
-.d7 .dot { background: #e91e63; }
-
-/* Route lines via SVG */
-.route-svg { position: absolute; top: 0; left: 0; width: 720px; height: 800px; z-index: 1; }
-
-/* Stats bar at bottom of map */
-.stats-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: space-around; padding: 0 20px; }
-.stat { text-align: center; }
-.stat .num { font-size: 26px; font-weight: bold; color: #f0c040; }
-.stat .label { font-size: 12px; color: #8899bb; }
-
-/* Right panel - itinerary */
-.itinerary { width: 480px; height: 800px; background: #111d33; padding: 25px 25px; overflow: hidden; }
-.itin-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #f0c040; }
-.day-card { display: flex; margin-bottom: 10px; }
-.day-num { width: 50px; flex-shrink: 0; }
+.day-card { display: flex; margin-bottom: 12px; }
+.day-num { width: 46px; flex-shrink: 0; }
 .day-num .circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #fff; }
-.day-info { flex: 1; padding-left: 10px; border-left: 2px solid #2a3a5a; padding-bottom: 8px; }
-.day-info .title { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
-.day-info .desc { font-size: 11px; color: #8899bb; line-height: 1.4; }
-.day-info .transport { font-size: 10px; color: #5a7a9a; margin-top: 2px; }
+.day-info { flex: 1; padding-left: 12px; border-left: 2px solid #2a3a5a; padding-bottom: 10px; }
+.day-info .title { font-size: 15px; font-weight: bold; margin-bottom: 3px; }
+.day-info .desc { font-size: 12px; color: #8899bb; line-height: 1.5; }
+.day-info .transport { font-size: 11px; color: #5a7a9a; margin-top: 3px; }
 
-.tips { margin-top: 12px; padding: 10px 14px; background: rgba(240,192,64,0.1); border-left: 3px solid #f0c040; border-radius: 4px; }
-.tips .tip-title { font-size: 13px; font-weight: bold; color: #f0c040; margin-bottom: 4px; }
-.tips .tip-text { font-size: 11px; color: #8899bb; line-height: 1.5; }
+.stats-bar { display: flex; justify-content: space-around; padding: 15px 0; margin-top: 15px; border-top: 1px solid #2a3a5a; }
+.stat { text-align: center; }
+.stat .num { font-size: 22px; font-weight: bold; color: #f0c040; }
+.stat .label { font-size: 11px; color: #8899bb; }
 
-/* Map outline - simple polygon for NE US */
-.map-outline { position: absolute; top: 100px; left: 60px; width: 620px; height: 580px; z-index: 0; }
+.tips { margin-top: 15px; padding: 12px 14px; background: rgba(240,192,64,0.1); border-left: 3px solid #f0c040; border-radius: 4px; }
+.tips .tip-title { font-size: 13px; font-weight: bold; color: #f0c040; margin-bottom: 5px; }
+.tips .tip-text { font-size: 11px; color: #8899bb; line-height: 1.6; }
+
+/* Custom map markers */
+.school-marker { background: none; border: none; }
+.marker-inner { position: relative; text-align: center; }
+.marker-dot { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #fff; margin: 0 auto; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+.marker-label { font-size: 11px; font-weight: bold; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.9); white-space: nowrap; margin-top: 2px; }
+.marker-day { position: absolute; top: -10px; right: -18px; background: #f0c040; color: #000; font-size: 9px; font-weight: bold; padding: 1px 5px; border-radius: 8px; }
+
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  #map { width: 100%; height: 50vh; }
+  .sidebar { width: 100%; height: 50vh; }
+}
 </style>
 </head>
 <body>
 
-<div class="map-area">
-  <div class="map-title">🎓 <span>藤校巡游</span> 7天行程</div>
-  <div class="map-subtitle">IVY LEAGUE CAMPUS TOUR · 1大1小 · 2025暑假</div>
+<div id="map"></div>
 
-  <svg class="route-svg">
-    <!-- Map background - simple NE US outline -->
-    <path d="M100,600 L80,500 L100,400 L140,350 L200,300 L280,250 L340,200 L400,160 L500,130 L600,150 L650,200 L640,300 L600,400 L550,500 L500,560 L400,600 Z" fill="rgba(30,60,100,0.3)" stroke="rgba(100,140,200,0.3)" stroke-width="1"/>
-    <!-- Route lines -->
-    <line x1="450" y1="170" x2="510" y2="160" stroke="#f0c040" stroke-width="2" stroke-dasharray="6,3" opacity="0.6"/>
-    <line x1="510" y1="160" x2="555" y2="215" stroke="#f0c040" stroke-width="2" stroke-dasharray="6,3" opacity="0.6"/>
-    <line x1="555" y1="215" x2="575" y2="235" stroke="#f0c040" stroke-width="2" stroke-dasharray="6,3" opacity="0.6"/>
-    <line x1="575" y1="235" x2="498" y2="305" stroke="#f0c040" stroke-width="2" stroke-dasharray="6,3" opacity="0.6"/>
-    <line x1="498" y1="305" x2="458" y2="355" stroke="#f0c040" stroke-width="2" stroke-dasharray="6,3" opacity="0.6"/>
-    <line x1="458" y1="355" x2="425" y2="395" stroke="#f0c040" stroke-width="2" stroke-dasharray="6,3" opacity="0.6"/>
-    <line x1="425" y1="395" x2="398" y2="425" stroke="#f0c040" stroke-width="2" stroke-dasharray="6,3" opacity="0.6"/>
-    <line x1="398" y1="425" x2="358" y2="265" stroke="#f0c040" stroke-width="2" stroke-dasharray="6,3" opacity="0.6"/>
-  </svg>
-
-  <div class="school s-dartmouth d1">
-    <div class="day-badge">D1</div>
-    <div class="dot"></div>
-    <div class="name">Dartmouth</div>
-    <div class="cn">达特茅斯</div>
-  </div>
-  <div class="school s-harvard d2">
-    <div class="day-badge">D2</div>
-    <div class="dot"></div>
-    <div class="name">Harvard</div>
-    <div class="cn">哈佛</div>
-  </div>
-  <div class="school s-brown d2">
-    <div class="day-badge">D3</div>
-    <div class="dot"></div>
-    <div class="name">Brown</div>
-    <div class="cn">布朗</div>
-  </div>
-  <div class="school s-yale d4">
-    <div class="day-badge">D4</div>
-    <div class="dot"></div>
-    <div class="name">Yale</div>
-    <div class="cn">耶鲁</div>
-  </div>
-  <div class="school s-columbia d5">
-    <div class="day-badge">D5</div>
-    <div class="dot"></div>
-    <div class="name">Columbia</div>
-    <div class="cn">哥伦比亚</div>
-  </div>
-  <div class="school s-princeton d6">
-    <div class="day-badge">D6</div>
-    <div class="dot"></div>
-    <div class="name">Princeton</div>
-    <div class="cn">普林斯顿</div>
-  </div>
-  <div class="school s-upenn d6">
-    <div class="day-badge">D6</div>
-    <div class="dot"></div>
-    <div class="name">UPenn</div>
-    <div class="cn">宾大</div>
-  </div>
-  <div class="school s-cornell d7">
-    <div class="day-badge">D7</div>
-    <div class="dot"></div>
-    <div class="name">Cornell</div>
-    <div class="cn">康奈尔</div>
-  </div>
-
-  <div class="stats-bar">
-    <div class="stat"><div class="num">8</div><div class="label">藤校全覆盖</div></div>
-    <div class="stat"><div class="num">7</div><div class="label">天行程</div></div>
-    <div class="stat"><div class="num">~1500</div><div class="label">公里自驾</div></div>
-    <div class="stat"><div class="num">¥3万</div><div class="label">预算/人均</div></div>
-  </div>
-</div>
-
-<div class="itinerary">
-  <div class="itin-title">📋 每日行程</div>
+<div class="sidebar">
+  <div class="sidebar-title">🎓 <span>藤校巡游</span> 7天行程</div>
+  <div class="sidebar-sub">IVY LEAGUE CAMPUS TOUR · 1大1小 · 2025暑假</div>
 
   <div class="day-card">
     <div class="day-num"><div class="circle" style="background:#e74c3c;">D1</div></div>
@@ -206,11 +119,75 @@ body { width: 1200px; height: 800px; font-family: 'Segoe UI', Arial, sans-serif;
     </div>
   </div>
 
+  <div class="stats-bar">
+    <div class="stat"><div class="num">8</div><div class="label">藤校全覆盖</div></div>
+    <div class="stat"><div class="num">7</div><div class="label">天行程</div></div>
+    <div class="stat"><div class="num">~1500</div><div class="label">公里自驾</div></div>
+    <div class="stat"><div class="num">¥3万</div><div class="label">预算/人均</div></div>
+  </div>
+
   <div class="tips">
     <div class="tip-title">💡 省钱贴士</div>
     <div class="tip-text">• 提前3个月订机票（暑假高峰¥8000-12000往返）<br>• 住Airbnb或经济型酒店（$80-120/晚）<br>• 多数校园参观免费，提前官网预约Campus Tour</div>
   </div>
 </div>
+
+<script>
+const schools = [
+  { name: 'Dartmouth', cn: '达特茅斯', lat: 43.7044, lng: -72.2887, day: 'D1', color: '#e74c3c' },
+  { name: 'Harvard', cn: '哈佛', lat: 42.3770, lng: -71.1167, day: 'D2', color: '#e67e22' },
+  { name: 'Brown', cn: '布朗', lat: 41.8268, lng: -71.4025, day: 'D3', color: '#f1c40f' },
+  { name: 'Yale', cn: '耶鲁', lat: 41.3163, lng: -72.9223, day: 'D4', color: '#2ecc71' },
+  { name: 'Columbia', cn: '哥伦比亚', lat: 40.8075, lng: -73.9626, day: 'D5', color: '#3498db' },
+  { name: 'Princeton', cn: '普林斯顿', lat: 40.3431, lng: -74.6551, day: 'D6', color: '#9b59b6' },
+  { name: 'UPenn', cn: '宾大', lat: 39.9522, lng: -75.1932, day: 'D6', color: '#9b59b6' },
+  { name: 'Cornell', cn: '康奈尔', lat: 42.4534, lng: -76.4735, day: 'D7', color: '#e91e63' },
+];
+
+// Route order
+const route = [0, 1, 2, 3, 4, 5, 6, 7]; // Dartmouth→Harvard→Brown→Yale→Columbia→Princeton→UPenn→Cornell
+
+const map = L.map('map', {
+  center: [41.5, -73.5],
+  zoom: 7,
+  zoomControl: true,
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  maxZoom: 19,
+}).addTo(map);
+
+// Draw route polyline
+const routeCoords = route.map(i => [schools[i].lat, schools[i].lng]);
+L.polyline(routeCoords, {
+  color: '#f0c040',
+  weight: 3,
+  opacity: 0.7,
+  dashArray: '10, 6',
+}).addTo(map);
+
+// Add markers
+schools.forEach(s => {
+  const icon = L.divIcon({
+    className: 'school-marker',
+    html: `
+      <div class="marker-inner">
+        <div class="marker-day">${s.day}</div>
+        <div class="marker-dot" style="background:${s.color};"></div>
+        <div class="marker-label">${s.name}<br>${s.cn}</div>
+      </div>
+    `,
+    iconSize: [80, 50],
+    iconAnchor: [40, 10],
+  });
+  L.marker([s.lat, s.lng], { icon }).addTo(map);
+});
+
+// Fit bounds
+const bounds = L.latLngBounds(schools.map(s => [s.lat, s.lng]));
+map.fitBounds(bounds.pad(0.15));
+</script>
 
 </body>
 </html>
