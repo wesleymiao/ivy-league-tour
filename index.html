@@ -159,8 +159,8 @@ const distances = ['200km', '200km', '80km', '160km', '120km', '80km', '70km', '
 const map = L.map('map', { center: [41.5, -73.2], zoom: 7, zoomControl: true });
 
 // Light map tile
-L.tileLayer('https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
   maxZoom: 19,
 }).addTo(map);
 
