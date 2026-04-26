@@ -46,6 +46,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1a2e; color: #
 .stat .label { font-size: 10px; color: #8899bb; }
 .stat .saving { font-size: 10px; color: #2ecc71; }
 
+/* Flight info */
+.flight-info { padding: 10px 20px; border-bottom: 1px solid #1a2a4a; flex-shrink: 0; display: flex; gap: 15px; }
+.flight-box { flex: 1; background: rgba(52,152,219,0.1); border-radius: 8px; padding: 8px 12px; }
+.flight-box .fl-label { font-size: 10px; color: #5a7a9a; margin-bottom: 2px; }
+.flight-box .fl-city { font-size: 14px; font-weight: bold; }
+.flight-box .fl-airport { font-size: 11px; color: #8899bb; }
+
 /* Comparison badge */
 .compare-note { padding: 8px 20px; background: rgba(46,204,113,0.1); border-top: 1px solid #2a3a5a; flex-shrink: 0; font-size: 11px; color: #2ecc71; text-align: center; }
 
@@ -63,6 +70,11 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1a2e; color: #
 .start-label { font-size: 12px; font-weight: bold; color: #333; text-shadow: 0 0 3px #fff, 0 0 6px #fff; white-space: nowrap; margin-top: 2px; }
 .dist-label { background: none; border: none; }
 .dist-text { background: rgba(255,255,255,0.92); color: #333; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 1px solid #ccc; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.airport-marker { background: none; border: none; }
+.airport-inner { text-align: center; }
+.airport-icon { font-size: 22px; }
+.airport-label { font-size: 11px; font-weight: bold; color: #1a5276; text-shadow: 0 0 3px #fff, 0 0 6px #fff; white-space: nowrap; margin-top: 1px; }
+.airport-type { font-size: 9px; color: #2980b9; text-shadow: 0 0 3px #fff, 0 0 6px #fff; white-space: nowrap; }
 
 @media (max-width: 768px) {
   body { flex-direction: column; }
@@ -79,6 +91,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1a2e; color: #
 <div class="sidebar">
   <div class="plan-tabs" id="tabs"></div>
   <div class="plan-header" id="planHeader"></div>
+  <div class="flight-info" id="flightInfo"></div>
   <div class="itinerary" id="itinerary"></div>
   <div class="compare-note" id="compareNote"></div>
   <div class="stats-bar" id="statsBar"></div>
@@ -86,6 +99,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1a2e; color: #
 
 <script>
 const boston = { name: 'Boston', cn: '波士顿', lat: 42.3601, lng: -71.0589 };
+
+const airports = {
+  BOS: { name: 'BOS', cn: '波士顿洛根机场', lat: 42.3656, lng: -71.0096 },
+  PHL: { name: 'PHL', cn: '费城国际机场', lat: 39.8721, lng: -75.2411 },
+  JFK: { name: 'JFK', cn: '纽约肯尼迪机场', lat: 40.6413, lng: -73.7781 },
+  SYR: { name: 'SYR', cn: '锡拉丘兹机场', lat: 43.1112, lng: -76.1063 },
+};
 
 const allSchools = {
   dartmouth: { name: 'Dartmouth', cn: '达特茅斯', lat: 43.7044, lng: -72.2887, color: '#e74c3c' },
@@ -124,6 +144,7 @@ const plans = [
       { day: 'D7', color: '#e91e63', title: '康奈尔 → 返程', desc: 'Cornell校园、钟楼、峡谷瀑布。傍晚飞回', transport: '🚗 370km / 4h' },
     ],
     totalKm: 1280, numSchools: 8, numDays: 7, saving: null, badge: null,
+    flyIn: 'BOS', flyOut: 'SYR', flyNote: '康奈尔附近无大机场，可从Syracuse(SYR)飞回或开回纽约(JFK)',
   },
   {
     id: 'no-cornell', label: '去掉康奈尔', sublabel: '6天7校',
@@ -148,6 +169,7 @@ const plans = [
       { day: 'D6', color: '#9b59b6', title: '普林斯顿 + 宾大 → 费城飞回', desc: 'Princeton + UPenn，费城机场飞回', transport: '🚗 80+70km / 2h' },
     ],
     totalKm: 910, numSchools: 7, numDays: 6, saving: '省370km (29%)', badge: null,
+    flyIn: 'BOS', flyOut: 'PHL', flyNote: '费城机场航班多，回程方便',
   },
   {
     id: 'compact', label: '精简6校', sublabel: '5天 ⭐推荐',
@@ -170,6 +192,7 @@ const plans = [
       { day: 'D5', color: '#9b59b6', title: '普林斯顿 + 宾大 → 费城飞回', desc: 'Princeton + UPenn，费城机场飞回', transport: '🚗 80+70km / 2h' },
     ],
     totalKm: 515, numSchools: 6, numDays: 5, saving: '省765km (60%)', badge: '推荐',
+    flyIn: 'BOS', flyOut: 'PHL', flyNote: '一路南下，飞入飞出不走回头路',
   },
   {
     id: 'elite4', label: '精华4校', sublabel: '4天',
@@ -189,6 +212,7 @@ const plans = [
       { day: 'D4', color: '#3498db', title: '哥伦比亚 + 纽约自由行', desc: 'Columbia校园；中央公园、大都会博物馆、时代广场', transport: '🚗 80km / 1h' },
     ],
     totalKm: 445, numSchools: 4, numDays: 4, saving: '省835km (65%)', badge: null,
+    flyIn: 'BOS', flyOut: 'JFK', flyNote: '最后一站在纽约，JFK飞回最方便',
   },
 ];
 
@@ -219,6 +243,22 @@ function renderPlan(idx) {
   document.getElementById('planHeader').innerHTML = `
     <div class="plan-title">${plan.title}</div>
     <div class="plan-desc">${plan.desc}</div>
+  `;
+
+  // Flight info
+  const flyInApt = airports[plan.flyIn];
+  const flyOutApt = airports[plan.flyOut];
+  document.getElementById('flightInfo').innerHTML = `
+    <div class="flight-box">
+      <div class="fl-label">✈️ 飞入</div>
+      <div class="fl-city">${flyInApt.cn}</div>
+      <div class="fl-airport">${plan.flyIn} · ${flyInApt.name}</div>
+    </div>
+    <div class="flight-box">
+      <div class="fl-label">🛫 飞出</div>
+      <div class="fl-city">${flyOutApt.cn}</div>
+      <div class="fl-airport">${plan.flyOut} · ${flyOutApt.name}</div>
+    </div>
   `;
 
   // Itinerary
@@ -290,6 +330,20 @@ function renderPlan(idx) {
   }).addTo(map);
   mapLayers.push(bm);
 
+  // Airport markers
+  [plan.flyIn, plan.flyOut].forEach((code, i) => {
+    const apt = airports[code];
+    const label = i === 0 ? '飞入' : '飞出';
+    const am = L.marker([apt.lat, apt.lng], {
+      icon: L.divIcon({
+        className: 'airport-marker',
+        html: `<div class="airport-inner"><div class="airport-icon">${i === 0 ? '🛬' : '🛫'}</div><div class="airport-label">${code}</div><div class="airport-type">${label}</div></div>`,
+        iconSize: [60, 50], iconAnchor: [30, 10],
+      }),
+    }).addTo(map);
+    mapLayers.push(am);
+  });
+
   // School markers
   let dayIdx = 0;
   const dayMap = {};
@@ -331,9 +385,9 @@ function renderPlan(idx) {
     mapLayers.push(m);
   });
 
-  // Fit bounds to active route
-  const pts = [boston, ...plan.schools.map(k => allSchools[k])];
-  map.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])).pad(0.15));
+  // Fit bounds to active route + airports
+  const pts = [boston, ...plan.schools.map(k => allSchools[k]), airports[plan.flyIn], airports[plan.flyOut]];
+  map.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])).pad(0.12));
 }
 
 // Build tabs
