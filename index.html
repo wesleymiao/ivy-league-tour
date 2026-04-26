@@ -56,6 +56,18 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1a2e; color: #
 /* Comparison badge */
 .compare-note { padding: 8px 20px; background: rgba(46,204,113,0.1); border-top: 1px solid #2a3a5a; flex-shrink: 0; font-size: 11px; color: #2ecc71; text-align: center; }
 
+/* Cost breakdown */
+.cost-section { padding: 12px 20px; border-top: 1px solid #1a2a4a; flex-shrink: 0; }
+.cost-title { font-size: 13px; font-weight: bold; color: #f0c040; margin-bottom: 8px; }
+.cost-table { width: 100%; border-collapse: collapse; }
+.cost-table td { padding: 4px 0; font-size: 11px; }
+.cost-table td:first-child { color: #8899bb; }
+.cost-table td:nth-child(2) { color: #ccc; text-align: right; padding-right: 10px; }
+.cost-table td:nth-child(3) { color: #667; font-size: 10px; }
+.cost-table tr.cost-total td { border-top: 1px solid #2a3a5a; padding-top: 6px; font-weight: bold; color: #f0c040; font-size: 13px; }
+.cost-table tr.cost-total td:first-child { color: #f0c040; }
+.cost-note { font-size: 10px; color: #556; margin-top: 6px; font-style: italic; }
+
 /* Map markers */
 .school-marker { background: none; border: none; }
 .marker-inner { position: relative; text-align: center; }
@@ -94,6 +106,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1a2e; color: #
   <div class="flight-info" id="flightInfo"></div>
   <div class="itinerary" id="itinerary"></div>
   <div class="compare-note" id="compareNote"></div>
+  <div class="cost-section" id="costSection"></div>
   <div class="stats-bar" id="statsBar"></div>
 </div>
 
@@ -145,6 +158,15 @@ const plans = [
     ],
     totalKm: 1280, numSchools: 8, numDays: 7, saving: null, badge: null,
     flyIn: 'BOS', flyOut: 'SYR', flyNote: '康奈尔附近无大机场，可从Syracuse(SYR)飞回或开回纽约(JFK)',
+    costs: [
+      { item: '✈️ 机票（上海↔美国）', amount: '¥20,000', note: '1大1小，暑假高峰往返' },
+      { item: '🚗 租车 + 油费', amount: '¥5,600', note: '7天 · $100/天+油费' },
+      { item: '🏨 住宿', amount: '¥5,600', note: '6晚 · $110/晚均价' },
+      { item: '🍽️ 餐饮', amount: '¥4,900', note: '7天 · $100/天·2人' },
+      { item: '🎫 门票/活动', amount: '¥700', note: '多数校园免费，博物馆等' },
+      { item: '📱 杂费（签证/保险/通讯）', amount: '¥3,200', note: '签证¥1200+保险+SIM卡' },
+    ],
+    totalCost: '¥40,000',
   },
   {
     id: 'no-cornell', label: '去掉康奈尔', sublabel: '6天7校',
@@ -170,6 +192,15 @@ const plans = [
     ],
     totalKm: 910, numSchools: 7, numDays: 6, saving: '省370km (29%)', badge: null,
     flyIn: 'BOS', flyOut: 'PHL', flyNote: '费城机场航班多，回程方便',
+    costs: [
+      { item: '✈️ 机票（上海↔美国）', amount: '¥20,000', note: '1大1小，暑假高峰往返' },
+      { item: '🚗 租车 + 油费', amount: '¥4,800', note: '6天 · $100/天+油费' },
+      { item: '🏨 住宿', amount: '¥4,400', note: '5晚 · $110/晚均价' },
+      { item: '🍽️ 餐饮', amount: '¥4,200', note: '6天 · $100/天·2人' },
+      { item: '🎫 门票/活动', amount: '¥700', note: '多数校园免费' },
+      { item: '📱 杂费（签证/保险/通讯）', amount: '¥3,200', note: '签证¥1200+保险+SIM卡' },
+    ],
+    totalCost: '¥37,300',
   },
   {
     id: 'compact', label: '精简6校', sublabel: '5天 ⭐推荐',
@@ -193,6 +224,15 @@ const plans = [
     ],
     totalKm: 515, numSchools: 6, numDays: 5, saving: '省765km (60%)', badge: '推荐',
     flyIn: 'BOS', flyOut: 'PHL', flyNote: '一路南下，飞入飞出不走回头路',
+    costs: [
+      { item: '✈️ 机票（上海↔美国）', amount: '¥20,000', note: '1大1小，暑假高峰往返' },
+      { item: '🚗 租车 + 油费', amount: '¥4,000', note: '5天 · $100/天+油费' },
+      { item: '🏨 住宿', amount: '¥3,500', note: '4晚 · $110/晚均价' },
+      { item: '🍽️ 餐饮', amount: '¥3,500', note: '5天 · $100/天·2人' },
+      { item: '🎫 门票/活动', amount: '¥500', note: '多数校园免费' },
+      { item: '📱 杂费（签证/保险/通讯）', amount: '¥3,200', note: '签证¥1200+保险+SIM卡' },
+    ],
+    totalCost: '¥34,700',
   },
   {
     id: 'elite4', label: '精华4校', sublabel: '4天',
@@ -213,6 +253,15 @@ const plans = [
     ],
     totalKm: 445, numSchools: 4, numDays: 4, saving: '省835km (65%)', badge: null,
     flyIn: 'BOS', flyOut: 'JFK', flyNote: '最后一站在纽约，JFK飞回最方便',
+    costs: [
+      { item: '✈️ 机票（上海↔美国）', amount: '¥20,000', note: '1大1小，暑假高峰往返' },
+      { item: '🚗 租车 + 油费', amount: '¥3,200', note: '4天 · $100/天+油费' },
+      { item: '🏨 住宿', amount: '¥2,600', note: '3晚 · $110/晚均价' },
+      { item: '🍽️ 餐饮', amount: '¥2,800', note: '4天 · $100/天·2人' },
+      { item: '🎫 门票/活动', amount: '¥500', note: '多数校园免费' },
+      { item: '📱 杂费（签证/保险/通讯）', amount: '¥3,200', note: '签证¥1200+保险+SIM卡' },
+    ],
+    totalCost: '¥32,300',
   },
 ];
 
@@ -278,7 +327,27 @@ function renderPlan(idx) {
     <div class="stat"><div class="num">${plan.numSchools}</div><div class="label">藤校</div></div>
     <div class="stat"><div class="num">${plan.numDays}</div><div class="label">天</div></div>
     <div class="stat"><div class="num">~${plan.totalKm.toLocaleString()}</div><div class="label">公里</div></div>
-    <div class="stat"><div class="num">¥${plan.numDays <= 5 ? '2' : '3'}万</div><div class="label">预算/人均</div></div>
+    <div class="stat"><div class="num">${plan.totalCost}</div><div class="label">总费用(2人)</div></div>
+  `;
+
+  // Cost breakdown
+  document.getElementById('costSection').innerHTML = `
+    <div class="cost-title">💰 费用明细（1大1小）</div>
+    <table class="cost-table">
+      ${plan.costs.map(c => `
+        <tr>
+          <td>${c.item}</td>
+          <td>${c.amount}</td>
+          <td>${c.note}</td>
+        </tr>
+      `).join('')}
+      <tr class="cost-total">
+        <td>合计</td>
+        <td>${plan.totalCost}</td>
+        <td></td>
+      </tr>
+    </table>
+    <div class="cost-note">* 价格为暑假旺季估算，实际因预订时间和选择而异</div>
   `;
 
   // Compare note
