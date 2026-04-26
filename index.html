@@ -296,29 +296,62 @@ function renderPlan(idx) {
 
   const activeSet = new Set(plan.schools);
 
-  // Draw route
-  plan.route.forEach(r => {
-    const from = getPos(r.from);
-    const to = getPos(r.to);
-    const line = L.polyline([[from.lat, from.lng], [to.lat, to.lng]], {
-      color: '#e74c3c', weight: 3.5, opacity: 0.8, dashArray: '8, 5',
-    }).addTo(map);
-    mapLayers.push(line);
+  // Draw real driving routes via OSRM
+  async function drawRoutes() {
+    for (const r of plan.route) {
+      const from = getPos(r.from);
+      const to = getPos(r.to);
 
-    // Distance label
-    if (r.km > 10) {
-      const midLat = (from.lat + to.lat) / 2;
-      const midLng = (from.lng + to.lng) / 2;
-      const distMarker = L.marker([midLat, midLng], {
-        icon: L.divIcon({
-          className: 'dist-label',
-          html: `<div class="dist-text">${r.km}km</div>`,
-          iconSize: [60, 20], iconAnchor: [30, 10],
-        }), interactive: false,
-      }).addTo(map);
-      mapLayers.push(distMarker);
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        if (data.routes && data.routes[0]) {
+          const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+          const realDist = Math.round(data.routes[0].distance / 1000);
+          const realDur = Math.round(data.routes[0].duration / 3600 * 10) / 10;
+
+          const line = L.polyline(coords, {
+            color: '#e74c3c', weight: 4, opacity: 0.75,
+          }).addTo(map);
+          mapLayers.push(line);
+
+          // Distance label at midpoint of route
+          const midIdx = Math.floor(coords.length / 2);
+          const midPt = coords[midIdx];
+          const distMarker = L.marker(midPt, {
+            icon: L.divIcon({
+              className: 'dist-label',
+              html: `<div class="dist-text">${realDist}km · ${realDur}h</div>`,
+              iconSize: [90, 20], iconAnchor: [45, 10],
+            }), interactive: false,
+          }).addTo(map);
+          mapLayers.push(distMarker);
+        }
+      } catch (e) {
+        // Fallback to straight line
+        const line = L.polyline([[from.lat, from.lng], [to.lat, to.lng]], {
+          color: '#e74c3c', weight: 3.5, opacity: 0.8, dashArray: '8, 5',
+        }).addTo(map);
+        mapLayers.push(line);
+
+        if (r.km > 10) {
+          const midLat = (from.lat + to.lat) / 2;
+          const midLng = (from.lng + to.lng) / 2;
+          const distMarker = L.marker([midLat, midLng], {
+            icon: L.divIcon({
+              className: 'dist-label',
+              html: `<div class="dist-text">~${r.km}km</div>`,
+              iconSize: [60, 20], iconAnchor: [30, 10],
+            }), interactive: false,
+          }).addTo(map);
+          mapLayers.push(distMarker);
+        }
+      }
     }
-  });
+  }
+  drawRoutes();
 
   // Boston marker
   const bm = L.marker([boston.lat, boston.lng], {
