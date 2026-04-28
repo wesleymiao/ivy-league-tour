@@ -68,6 +68,23 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1a2e; color: #
 .cost-table tr.cost-total td:first-child { color: #f0c040; }
 .cost-note { font-size: 10px; color: #556; margin-top: 6px; font-style: italic; }
 
+/* Flight recommendations */
+.flight-rec { padding: 12px 20px; border-top: 1px solid #1a2a4a; flex-shrink: 0; }
+.flight-rec-title { font-size: 13px; font-weight: bold; color: #3498db; margin-bottom: 10px; }
+.flight-leg { background: rgba(52,152,219,0.08); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid #3498db; }
+.flight-leg.return { border-left-color: #e67e22; }
+.flight-leg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.flight-leg-dir { font-size: 12px; font-weight: bold; color: #3498db; }
+.flight-leg.return .flight-leg-dir { color: #e67e22; }
+.flight-leg-dur { font-size: 10px; color: #8899bb; }
+.flight-option { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.flight-option:last-child { border-bottom: none; }
+.flight-option .fo-rec { background: #2ecc71; color: #000; font-size: 9px; font-weight: bold; padding: 1px 5px; border-radius: 4px; flex-shrink: 0; }
+.flight-option .fo-airline { font-size: 11px; color: #ccc; min-width: 55px; }
+.flight-option .fo-route { font-size: 10px; color: #8899bb; flex: 1; }
+.flight-option .fo-price { font-size: 11px; color: #f0c040; font-weight: bold; flex-shrink: 0; }
+.flight-tip { font-size: 10px; color: #556; margin-top: 6px; font-style: italic; }
+
 /* Map markers */
 .school-marker { background: none; border: none; }
 .marker-inner { position: relative; text-align: center; }
@@ -107,6 +124,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1a2e; color: #
   <div class="itinerary" id="itinerary"></div>
   <div class="compare-note" id="compareNote"></div>
   <div class="cost-section" id="costSection"></div>
+  <div id="flightRec"></div>
   <div class="stats-bar" id="statsBar"></div>
 </div>
 
@@ -169,6 +187,25 @@ const plans = [
       { item: '📱 签证+保险+通讯', amount: '¥3,500', note: 'B1/B2签证¥1200+旅行险+eSIM' },
     ],
     totalCost: '¥44,500',
+    flightRecs: {
+      outbound: {
+        label: '去程：上海 → 波士顿', dur: '约18-20h（转机1次）',
+        options: [
+          { rec: true, airline: '东航+捷蓝', route: 'MU587 PVG→JFK 直飞15h → B6 JFK→BOS 1.5h', price: '¥8,000-12,000/人' },
+          { rec: false, airline: '国航', route: 'CA981 PVG→JFK → 转 AA/B6 → BOS', price: '¥7,500-11,000/人' },
+          { rec: false, airline: '达美', route: 'DL86 PVG→SEA/DTW → 转 DL → BOS', price: '¥8,500-13,000/人' },
+        ]
+      },
+      inbound: {
+        label: '回程：锡拉丘兹SYR → 上海', dur: '约22-26h（转机2次）',
+        options: [
+          { rec: true, airline: '自驾+东航', route: '康奈尔开车4h→JFK，MU588 JFK→PVG 直飞16h', price: '¥7,000-10,000/人' },
+          { rec: false, airline: '达美+东航', route: 'DL SYR→JFK 1h → MU588 JFK→PVG', price: '¥8,000-12,000/人' },
+          { rec: false, airline: '美联航', route: 'UA SYR→EWR → UA EWR→PVG', price: '¥8,500-13,000/人' },
+        ]
+      },
+      tip: '💡 推荐去程飞JFK转BOS，回程从康奈尔直接开车到JFK飞回，省一程机票'
+    },
   },
   {
     id: 'no-cornell', label: '去掉康奈尔', sublabel: '6天7校',
@@ -205,6 +242,25 @@ const plans = [
       { item: '📱 签证+保险+通讯', amount: '¥3,500', note: 'B1/B2签证¥1200+旅行险+eSIM' },
     ],
     totalCost: '¥40,700',
+    flightRecs: {
+      outbound: {
+        label: '去程：上海 → 波士顿', dur: '约18-20h（转机1次）',
+        options: [
+          { rec: true, airline: '东航+捷蓝', route: 'MU587 PVG→JFK 直飞15h → B6 JFK→BOS 1.5h', price: '¥8,000-12,000/人' },
+          { rec: false, airline: '国航', route: 'CA981 PVG→JFK → 转 AA/B6 → BOS', price: '¥7,500-11,000/人' },
+          { rec: false, airline: '达美', route: 'DL86 PVG→SEA/DTW → 转 DL → BOS', price: '¥8,500-13,000/人' },
+        ]
+      },
+      inbound: {
+        label: '回程：费城PHL → 上海', dur: '约19-24h（转机1次）',
+        options: [
+          { rec: true, airline: '美航+东航', route: 'AA PHL→JFK 1h → MU588 JFK→PVG 直飞16h', price: '¥7,500-11,000/人' },
+          { rec: false, airline: '美联航', route: 'UA PHL→EWR 30min → UA EWR→PVG 直飞15h', price: '¥8,000-12,000/人' },
+          { rec: false, airline: '达美', route: 'DL PHL→DTW 2h → DL DTW→PVG 14h', price: '¥8,500-13,000/人' },
+        ]
+      },
+      tip: '💡 费城到JFK/EWR很近，回程转机方便，航班选择多'
+    },
   },
   {
     id: 'compact', label: '精简6校', sublabel: '5天 ⭐推荐',
@@ -239,6 +295,25 @@ const plans = [
       { item: '📱 签证+保险+通讯', amount: '¥3,500', note: 'B1/B2签证¥1200+旅行险+eSIM' },
     ],
     totalCost: '¥37,500',
+    flightRecs: {
+      outbound: {
+        label: '去程：上海 → 波士顿', dur: '约18-20h（转机1次）',
+        options: [
+          { rec: true, airline: '东航+捷蓝', route: 'MU587 PVG→JFK 直飞15h → B6 JFK→BOS 1.5h', price: '¥8,000-12,000/人' },
+          { rec: false, airline: '国航', route: 'CA981 PVG→JFK → 转 AA/B6 → BOS', price: '¥7,500-11,000/人' },
+          { rec: false, airline: '达美', route: 'DL86 PVG→SEA/DTW → 转 DL → BOS', price: '¥8,500-13,000/人' },
+        ]
+      },
+      inbound: {
+        label: '回程：费城PHL → 上海', dur: '约19-24h（转机1次）',
+        options: [
+          { rec: true, airline: '美航+东航', route: 'AA PHL→JFK 1h → MU588 JFK→PVG 直飞16h', price: '¥7,500-11,000/人' },
+          { rec: false, airline: '美联航', route: 'UA PHL→EWR 30min → UA EWR→PVG 直飞15h', price: '¥8,000-12,000/人' },
+          { rec: false, airline: '达美', route: 'DL PHL→DTW 2h → DL DTW→PVG 14h', price: '¥8,500-13,000/人' },
+        ]
+      },
+      tip: '💡 一路南下不走回头路，BOS进PHL出，省时省力最优解'
+    },
   },
   {
     id: 'elite4', label: '精华4校', sublabel: '4天',
@@ -270,6 +345,25 @@ const plans = [
       { item: '📱 签证+保险+通讯', amount: '¥3,500', note: 'B1/B2签证¥1200+旅行险+eSIM' },
     ],
     totalCost: '¥34,000',
+    flightRecs: {
+      outbound: {
+        label: '去程：上海 → 波士顿', dur: '约18-20h（转机1次）',
+        options: [
+          { rec: true, airline: '东航+捷蓝', route: 'MU587 PVG→JFK 直飞15h → B6 JFK→BOS 1.5h', price: '¥8,000-12,000/人' },
+          { rec: false, airline: '国航', route: 'CA981 PVG→JFK → 转 AA/B6 → BOS', price: '¥7,500-11,000/人' },
+          { rec: false, airline: '达美', route: 'DL86 PVG→SEA/DTW → 转 DL → BOS', price: '¥8,500-13,000/人' },
+        ]
+      },
+      inbound: {
+        label: '回程：纽约JFK → 上海', dur: '约16h（直飞✈️）',
+        options: [
+          { rec: true, airline: '东航', route: 'MU588 JFK→PVG 直飞16h 每日一班', price: '¥6,500-9,500/人' },
+          { rec: false, airline: '国航', route: 'CA982 JFK→PVG 直飞15.5h', price: '¥7,000-10,000/人' },
+          { rec: false, airline: '达美', route: 'DL89 JFK→PVG 直飞15h', price: '¥8,000-12,000/人' },
+        ]
+      },
+      tip: '💡 最后一站纽约，JFK直飞上海最方便，回程最省心！'
+    },
   },
 ];
 
@@ -365,6 +459,45 @@ function renderPlan(idx) {
     note.innerHTML = `✅ 相比全部8校方案：${plan.saving}`;
   } else {
     note.style.display = 'none';
+  }
+
+  // Flight recommendations
+  const fr = plan.flightRecs;
+  if (fr) {
+    document.getElementById('flightRec').innerHTML = `
+      <div class="flight-rec">
+        <div class="flight-rec-title">✈️ 航班推荐</div>
+        <div class="flight-leg">
+          <div class="flight-leg-header">
+            <span class="flight-leg-dir">🛬 ${fr.outbound.label}</span>
+            <span class="flight-leg-dur">${fr.outbound.dur}</span>
+          </div>
+          ${fr.outbound.options.map(o => `
+            <div class="flight-option">
+              ${o.rec ? '<span class="fo-rec">推荐</span>' : ''}
+              <span class="fo-airline">${o.airline}</span>
+              <span class="fo-route">${o.route}</span>
+              <span class="fo-price">${o.price}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="flight-leg return">
+          <div class="flight-leg-header">
+            <span class="flight-leg-dir">🛫 ${fr.inbound.label}</span>
+            <span class="flight-leg-dur">${fr.inbound.dur}</span>
+          </div>
+          ${fr.inbound.options.map(o => `
+            <div class="flight-option">
+              ${o.rec ? '<span class="fo-rec">推荐</span>' : ''}
+              <span class="fo-airline">${o.airline}</span>
+              <span class="fo-route">${o.route}</span>
+              <span class="fo-price">${o.price}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="flight-tip">${fr.tip}</div>
+      </div>
+    `;
   }
 
   // Update map
